@@ -1,44 +1,9 @@
-import pandas as pd
-import numpy as np
-import json
-import time
 import requests
 from app_store_scraper import AppStore
 import pathlib
 from datetime import datetime, timedelta
-from smart_open import open
-
-now = datetime.now()
-params = {
-    'now_day': str(now.day),
-    'now_day_02': f"{now.day:02d}",
-    'now_month': str(now.month),
-    'now_month_02': f"{now.month:02d}",
-    'now_month_text': now.strftime('%B'),
-    'now_year': str(now.year)
-}
-
-
-def parameterise_input(inp):
-    for i in params: inp=inp.replace("${"+f'{i}'+"}",params[i])
-    return inp
-def data_upload(data, output):
-    with open(output, 'wb') as f:
-        json.dump(data, f)
-    return output
-
-
-def get_reviews_data(conf, bucket):
-    ext = Extractor(conf["app"])
-    for app in conf["app"]:
-        filename, data = ext.get_reviews_rss(app)
-        output_path = f"s3://{bucket}/{parameterise_input(conf['output']+filename)}.json"
-
-        print(f"Downlaoding data for: {app} ...")
-        data_upload(data, output_path)
-        print(f"File uploaded into: {output_path}\n")
-
-
+import json
+import time
 
 
 class Extractor:
@@ -78,10 +43,11 @@ class Extractor:
             else:
                 print(f"No entry found in response at page {page}!")
                 break
+        print(f'{app_name} => {len(all_reviews)} reviews')
         if save=="local":
-            self.save_reviews(all_reviews, f'{app_name}-{app_id}-rss'.lower())
+            self.save_reviews(all_reviews, f'rss/{app_name}-{app_id}'.lower())
         elif save=='s3':
-            return f'{app_name}-{app_id}-rss'.lower(), all_reviews
+            return f'{app_name}-{app_id}'.lower(), all_reviews, 'rss'
             
                     
         
@@ -102,22 +68,17 @@ class Extractor:
             after = datetime.now() - timedelta(no_of_days)
         app_store = AppStore(country='us', app_name=app_name, app_id = app_id)
         app_store.review(how_many=number_of_reviews, after=after)
+        print(f'{app_name} => {len(app_store.reviews)} reviews')
         if save=='local':
-            self.save_reviews(app_store.reviews, f'{app_name}-{app_id}-scraper'.lower())
+            self.save_reviews(app_store.reviews, f'scraper/{app_name}-{app_id}'.lower())
         elif save=='s3':
-            return f'{app_name}-{app_id}-rss'.lower(), app_store.reviews
+            return f'{app_name}-{app_id}'.lower(), app_store.reviews, 'scraper'
           
 
-if __name__=='__main__':
-    with open('../DATA/app_list.json', mode='r', encoding='utf-8') as f:
-        apps =  json.load(f) 
-    
-    event = {
-            'app': apps,
-            'output': 'raw/year=${now_year}/month=${now_month}/day=${now_month_text}/day=${now_day_02}/'
-        }
-    
-    start_time = time.perf_counter()
-    get_reviews_data(event, 'track-project')
-    end_time = time.perf_counter()
-    print(f"Time elapsed is {end_time - start_time}\n")
+
+
+# stream content *into* S3 (write mode) using a custom session
+
+# with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
+#     bytes_written = fout.write(b'hello world!')
+#     print(bytes_written)
