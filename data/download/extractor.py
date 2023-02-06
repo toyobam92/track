@@ -53,19 +53,19 @@ class Extractor:
         
     def get_reviews_scraper(self, app_name="Acorns", number_of_reviews=2000, no_of_days=None): 
         try:           
-            self.attempt_get_reviews(app_name, no_of_days, number_of_reviews)
+            return self.attempt_get_reviews(app_name, no_of_days, number_of_reviews)
         except ValueError as e :
             return print(e)
         
         except Exception as e:
-            print(f"{app_name} not found, retrying after 120 seconds")
+            print(f"{app_name} not found, retrying after 20 seconds")
             print(e)
-            time.sleep(60)
+            time.sleep(20)
 
     def attempt_get_reviews(self, app_name, no_of_days, number_of_reviews, save='s3'):
         app_id = self.check_for_id(app_name)
-        if no_of_days:
-            after = datetime.now() - timedelta(no_of_days)
+        
+        after = datetime.now() - timedelta(no_of_days) if no_of_days else None
         app_store = AppStore(country='us', app_name=app_name, app_id = app_id)
         app_store.review(how_many=number_of_reviews, after=after)
         print(f'{app_name} => {len(app_store.reviews)} reviews')

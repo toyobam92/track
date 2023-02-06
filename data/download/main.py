@@ -5,7 +5,7 @@ import time
 
 from smart_open import open
 import os, boto3
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 from extractor import Extractor 
@@ -29,14 +29,16 @@ def parameterise_input(inp):
     return inp
 def data_upload(data, output, session):
     with open(output, 'w', transport_params={'client': session.client('s3')}) as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=4, default=str)
     return output
 
 
 def get_reviews_data(conf, bucket, session):
     ext = Extractor(conf["app"])
     for app in conf["app"]:
-        filename, data, method = ext.get_reviews_rss(app)
+        # filename, data, method = ext.get_reviews_rss(app)
+        timediff= now - datetime(2021, 1,1)
+        filename, data, method = ext.get_reviews_scraper(app, no_of_days=timediff.days)
         output_path = f"s3://{bucket}/raw/{method}/{parameterise_input(conf['output']+filename)}.json"
 
         print(f"Downlaoding data for: {app} ")
@@ -64,7 +66,7 @@ if __name__=='__main__':
     
     event = {'app': apps, 'output': 'year=${now_year}/month=${now_month_text}/day=${now_day_02}/'}
     start_time = time.perf_counter()
-    get_reviews_data(event, 'track-project', session)
+    get_reviews_data(conf=event, bucket='track-project', session=session)
     end_time = time.perf_counter()
     print(f"Extraction: Time elapsed is {end_time - start_time}\n")
     

@@ -42,3 +42,4 @@ class Processor:
 
     def rss_processor(self, data):
         return pd.json_normalize(data).to_csv(index=False)
+    
