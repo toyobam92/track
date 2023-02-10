@@ -41,5 +41,13 @@ class Processor:
         return app_reviews_df.to_csv(index=False)
 
     def rss_processor(self, data):
-        return pd.json_normalize(data).to_csv(index=False)
+        temp = pd.json_normalize(data)[["updated.label", "im:rating.label", "im:version.label", "title.label", "content.label"]]
+        return temp.to_csv(index=False)
     
+    
+#     df = pd.json_normalize(data)
+
+
+
+
+# df[df['author.name.label'].apply(lambda x: 'Tea' in x)]

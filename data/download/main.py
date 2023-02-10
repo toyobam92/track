@@ -36,9 +36,9 @@ def data_upload(data, output, session):
 def get_reviews_data(conf, bucket, session):
     ext = Extractor(conf["app"])
     for app in conf["app"]:
-        # filename, data, method = ext.get_reviews_rss(app)
-        timediff= now - datetime(2021, 1,1)
-        filename, data, method = ext.get_reviews_scraper(app, no_of_days=timediff.days)
+        filename, data, method = ext.get_reviews_rss(app)
+        # timediff= now - datetime(2021, 1,1)
+        # filename, data, method = ext.get_reviews_scraper(app, no_of_days=timediff.days)
         output_path = f"s3://{bucket}/raw/{method}/{parameterise_input(conf['output']+filename)}.json"
 
         print(f"Downlaoding data for: {app} ")

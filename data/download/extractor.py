@@ -67,8 +67,8 @@ class Extractor:
         
         after = datetime.now() - timedelta(no_of_days) if no_of_days else None
         app_store = AppStore(country='us', app_name=app_name, app_id = app_id)
-        app_store.review(how_many=number_of_reviews, after=after)
-        print(f'{app_name} => {len(app_store.reviews)} reviews')
+        app_store.review(how_many=number_of_reviews, after=after, sleep=20)
+        print(f'{app_name} => {len(app_store.reviews)} reviews\n')
         if save=='local':
             self.save_reviews(app_store.reviews, f'scraper/{app_name}-{app_id}'.lower())
         elif save=='s3':
