@@ -1,12 +1,16 @@
 import './App.css';
+import React from 'react';
+import Home from "./Pages/Home"
+import Datasets from "./components/Datasets";
+import  {Route, Routes} from 'react-router-dom';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        Track.io
-      </header>
-    </div>
+    <Routes>
+      <Route exact path='/' element=<Home/> />
+      <Route exact path='/datasets' element=<Datasets/> />
+
+    </Routes>
   );
 }
 
